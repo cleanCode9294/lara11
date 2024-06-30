@@ -5,6 +5,8 @@ namespace App\Services\Auth;
 use App\DTO\UserDTO;
 use App\Models\User;
 use App\Repositories\User\IUserRepository;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class AuthService implements IAuthService
 {
@@ -14,9 +16,29 @@ class AuthService implements IAuthService
     {
     }
 
-    public function login(UserDTO $authDTO)
+    /**
+     * @param UserDTO $authDTO
+     * @return array|JsonResponse
+     */
+    public function login(UserDTO $authDTO): array|JsonResponse
     {
-        // TODO: Implement login() method.
+        if (Auth::attempt(['email' => $authDTO->email, 'password' => $authDTO->password])) {
+
+            /** @var User $user */
+
+            $user = Auth::user();
+
+            $token = $user->createToken('appToken')->plainTextToken;
+
+            return ['success' => true, 'token' => $token];
+
+        } else {
+
+            return [
+                'success' => false,
+                'message' => 'Failed to authenticate.',
+            ];
+        }
     }
 
     public function logout()
