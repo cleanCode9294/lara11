@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\DTO\AuthDTO;
-use App\DTO\UserDTO;
+use App\Http\Requests\UserRequest;
 use App\Services\Auth\AuthService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Spatie\DataTransferObject\Exceptions\UnknownProperties;
 
 class AuthController extends Controller
@@ -18,24 +16,14 @@ class AuthController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param UserRequest $request
      * @return JsonResponse
      * @throws UnknownProperties
      */
-    public function register(Request $request): JsonResponse
+    public function register(UserRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string|min:2',
-            'email' => 'required|unique:users,email|email|string',
-            'password' => 'required|min:6'
-        ]);
+        $data = $this->service->register($request->getDTO());
 
-        $token = $this->service->register(new UserDTO(
-            name: $request->get('name'),
-            email: $request->get('email'),
-            password: $request->get('password')
-        ));
-
-        return response()->json(['token' => $token]);
+        return response()->json(['success' => true, 'data' => $data]);
     }
 }

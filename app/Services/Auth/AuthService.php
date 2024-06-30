@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\DTO\UserDTO;
+use App\Models\User;
 use App\Repositories\User\IUserRepository;
 
 class AuthService implements IAuthService
@@ -23,9 +24,21 @@ class AuthService implements IAuthService
         // TODO: Implement logout() method.
     }
 
-    public function register(UserDTO $authDTO)
+    /**
+     * @param UserDTO $authDTO
+     * @return array
+     */
+    public function register(UserDTO $authDTO): array
     {
-        return $this->repository->create($authDTO->toArray());
+        /** @var User $user */
+        $user = $this->repository->create($authDTO->toArray());
+
+        $token = $user->createToken('appToken')->plainTextToken;
+
+        return [
+            'user' => $user,
+            'token' => $token
+        ];
     }
 
     public function getCurrentUser()
